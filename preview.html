@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Water Analytics Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    background: linear-gradient(135deg, #0f172a, #020617);
+    color: white;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 230px;
+    background: #020617;
+    height: 100vh;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 30px;
+    color: #38bdf8;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.sidebar ul li:hover {
+    color: #38bdf8;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Topbar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* Cards */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Tap Grid */
+.taps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.tap {
+    background: #334155;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.on { color: lightgreen; }
+.off { color: orange; }
+
+/* Buttons */
+button {
+    margin-top: 8px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #38bdf8;
+    cursor: pointer;
+}
+
+/* Status */
+.status { font-size: 18px; }
+.leak { color: red; }
+.normal { color: lightgreen; }
+
+/* Image */
+.hero img {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>💧 WaterSys</h2>
+    <ul>
+        <li>Dashboard</li>
+        <li>Analytics</li>
+        <li>Alerts</li>
+        <li>Settings</li>
+    </ul>
+</div>
+
+<div class="main">
+
+<div class="topbar">
+    <h2>Dashboard</h2>
+    <p>Welcome 👋</p>
+</div>
+
+<div class="cards">
+
+<div class="card">
+    <h3>Total Usage</h3>
+    <h2 id="usage">120 L</h2>
+    <button onclick="increaseUsage()">+ Use Water</button>
+</div>
+
+<div class="card">
+    <h3>System Status</h3>
+    <p id="status" class="status normal">All Good ✅</p>
+</div>
+
+<div class="card">
+    <h3>Leak Detection</h3>
+    <button onclick="startCheck()">Start Monitor</button>
+    <p id="timer"></p>
+</div>
+
+<div class="card">
+    <h3>Usage History</h3>
+    <ul id="history">
+        <li>100 L</li>
+        <li>110 L</li>
+        <li>120 L</li>
+        <li>90 L</li>
+    </ul>
+</div>
+
+<div class="card">
+    <h3>Tap Control</h3>
+    <div class="taps" id="taps"></div>
+</div>
+
+<div class="card hero">
+    <h3>💡 Save Water</h3>
+    <p>"Save water today, secure tomorrow."</p>
+    <img src="https://images.unsplash.com/photo-1508873699372-7aeab60b44ab">
+</div>
+
+</div>
+
+</div>
+
+<script>
+let usage = 120;
+let timer = 0;
+let interval;
+
+let taps = {A:true,B:true,C:true,D:true,E:true,F:true,G:true};
+
+function renderTaps() {
+    let container = document.getElementById("taps");
+    container.innerHTML = "";
+
+    for (let key in taps) {
+        let status = taps[key] ? "ON" : "OFF";
+        let color = taps[key] ? "on" : "off";
+
+        let div = document.createElement("div");
+        div.className = "tap";
+
+        div.innerHTML = `
+            <b>Tap ${key}</b><br>
+            <span class="${color}">${status}</span><br>
+            <button onclick="toggleTap('${key}')">Toggle</button>
+        `;
+
+        container.appendChild(div);
+    }
+}
+
+function toggleTap(t) {
+    taps[t] = !taps[t];
+    renderTaps();
+}
+
+function increaseUsage() {
+    usage += Math.floor(Math.random()*10);
+    document.getElementById("usage").innerText = usage + " L";
+
+    let li = document.createElement("li");
+    li.innerText = usage + " L";
+    document.getElementById("history").appendChild(li);
+}
+
+function startCheck() {
+    timer = 0;
+    clearInterval(interval);
+
+    interval = setInterval(() => {
+        timer++;
+        document.getElementById("timer").innerText = "Time: " + timer + "s";
+
+        let allOff = Object.values(taps).every(v => v === false);
+
+        if (allOff && timer > 10) {
+            document.getElementById("status").innerText = "Leak Detected 🚨";
+            document.getElementById("status").className = "status leak";
+            clearInterval(interval);
+        }
+    }, 1000);
+}
+
+renderTaps();
+</script>
+
+</body>
+</html>
